@@ -1,0 +1,40 @@
+# docker-compose.yml
+version: '3.7'
+
+services:
+  airflow:
+    image: apache/airflow:2.5.0
+    restart: always
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__FERNET_KEY=FERNET_KEY
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
+      - AIRFLOW__WEBSERVER__BASE_URL=http://localhost:8080
+    volumes:
+      - ./airflow:/opt/airflow
+    ports:
+      - "8080:8080"
+    command: bash -c "airflow db init && airflow webserver & airflow scheduler"
+
+  dbt:
+    image: fishtownanalytics/dbt:latest
+    restart: always
+    volumes:
+      - ./dbt:/dbt
+    environment:
+      - DBT_PROFILES_DIR=/dbt
+    command: ["dbt", "run"]
+  
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: spotify_data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"

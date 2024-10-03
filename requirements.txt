@@ -1,0 +1,6 @@
+requests
+pandas
+sqlite3
+apache-airflow
+dbt
+redash-py
